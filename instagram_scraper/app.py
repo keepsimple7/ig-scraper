@@ -1407,7 +1407,7 @@ class InstagramScraper(object):
     @staticmethod
     def get_locations_from_file(locations_file):
         """
-        parse an ini like file with sections composed of headers, [locaiton],
+        parse an ini like file with sections composed of headers, [location],
         and arguments that are location ids
         """
         locations={}
