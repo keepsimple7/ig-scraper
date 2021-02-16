@@ -193,6 +193,24 @@ OPTIONS
                         If the template is invalid, it will revert to the default.
                         Does not work with --tag and --location.
 ```
+Develop
+-------
+How to install Docker see https://docs.docker.com/engine/install/.
+
+Don't forget to run postinstall steps for Linux https://docs.docker.com/engine/install/linux-postinstall/.
+
+#### Build
+```bash
+$ docker build -t instagram-scraper .
+```
+#### Run
+```bash
+$ docker run -it --rm -v $(pwd)/data:/instagram-scraper/data instagram-scraper -i -d data/<folder_name> <params>
+```
+If you want to save `cookiejar` to you HDD you have to run it like this:
+```bash
+$ docker run -it --rm -v $(pwd)/data:/instagram-scraper/data instagram-scraper -i -d data/<folder_name> --cookiejar data/my_cookies <params>
+```
 
 Develop
 -------
