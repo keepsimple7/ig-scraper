@@ -17,8 +17,6 @@ import socket
 import sys
 import textwrap
 import time
-import xml.etree.ElementTree as ET
-import moviepy.editor as mpe
 
 try:
     from urllib.parse import urlparse
@@ -93,7 +91,7 @@ class InstagramScraper(object):
                             destination='./', logger=None, retain_username=False, interactive=False,
                             quiet=False, maximum=0, media_metadata=False, profile_metadata=False, latest=False,
                             latest_stamps=False, cookiejar=None, filter_location=None, filter_locations=None,
-                            media_types=['image', 'video', 'story-image', 'story-video', 'broadcast'],
+                            media_types=['image', 'video', 'story-image', 'story-video'],
                             tag=False, location=False, search_location=False, comments=False,
                             verbose=0, include_location=False, filter=None, proxies={}, no_check_certificate=False,
                                                         template='{urlname}', log_destination='')
@@ -653,7 +651,6 @@ class InstagramScraper(object):
 
                 if self.logged_in:
                     self.get_stories(dst, executor, future_to_item, user, username)
-                    self.get_broadcasts(dst, executor, future_to_item, user)
 
                 # Crawls the media and sends it to the executor.
                 try:
@@ -789,24 +786,6 @@ class InstagramScraper(object):
                 if self.maximum != 0 and iter >= self.maximum:
                     break
 
-    def get_broadcasts(self, dst, executor, future_to_item, user):
-        """Scrapes the user's broadcasts."""
-        if self.logged_in and 'broadcast' in self.media_types:
-            # Get the user's broadcasts.
-            broadcasts = self.fetch_broadcasts(user['id'])
-
-            # Downloads the user's broadcasts and sends it to the executor.
-            iter = 0
-            for item in tqdm.tqdm(broadcasts, desc='Searching {0} for broadcasts'.format(user['username']), unit=" media",
-                                  disable=self.quiet):
-                item['username'] = user['username']
-                future = executor.submit(self.worker_wrapper, self.dowload_broadcast, item, dst)
-                future_to_item[future] = item
-
-                iter = iter + 1
-                if self.maximum != 0 and iter >= self.maximum:
-                    break
-
     def get_media(self, dst, executor, future_to_item, user):
         """Scrapes the user's posts for media."""
         if 'image' not in self.media_types and 'video' not in self.media_types and 'none' not in self.media_types:
@@ -926,48 +905,6 @@ class InstagramScraper(object):
                 return stories
 
         return []
-
-    def fetch_broadcasts(self, user_id):
-        self.session.headers.update({'Host': 'i.instagram.com'})
-        resp = self.get_json(BROADCAST_URL.format(user_id))
-        del self.session.headers['Host']
-
-
-        if resp is not None:
-            retval = json.loads(resp)
-
-
-            if 'post_live_item' not in retval:
-                return []
-
-            broadcasts = []
-
-            for broadcast in retval['post_live_item']['broadcasts']:
-                dash_manifest = ET.fromstring(broadcast['dash_manifest'])
-                xmlns = '{urn:mpeg:dash:schema:mpd:2011}'
-
-                video_adaptation_set = dash_manifest.find('.//{0}Representation[@mimeType="video/mp4"]/..'.format(xmlns))
-                audio_adaptation_set = dash_manifest.find('.//{0}Representation[@mimeType="audio/mp4"]/..'.format(xmlns))
-
-                best_video_quality = (video_adaptation_set.get('maxWidth'), video_adaptation_set.get('maxHeight'))
-                video_element = video_adaptation_set.find('.//*[@width="{0}"][@height="{1}"]/{2}BaseURL'.format(best_video_quality[0], best_video_quality[1], xmlns))
-                video_url = video_element.text
-
-                audio_element = audio_adaptation_set.find('.//{0}BaseURL'.format(xmlns))
-                audio_url = audio_element.text
-
-                ret = {
-                    'user_id': user_id,
-                    'published_time': broadcast['published_time'],
-                    'video': video_url,
-                    'audio': audio_url
-                }
-
-                broadcasts.append(ret)
-
-            return broadcasts
-
-        return None
 
     def query_media_gen(self, user, end_cursor=''):
         """Generator for media."""
@@ -1207,32 +1144,6 @@ class InstagramScraper(object):
             files_path.append(file_path)
 
         return files_path
-
-    def dowload_broadcast(self, item, save_dir='./'):
-        tmp_item = {
-            'urls': [item['video']],
-            'username': item['username'],
-            'shortcode': '',
-            'published_time': item['published_time'],
-            '__typename': 'GraphVideo'
-        }
-
-        # There is only one item
-        video_item = self.download(tmp_item, save_dir)[0]
-
-        tmp_item['urls'] = [item['audio']]
-        # There is only one item
-        audio_item = self.download(tmp_item, save_dir)[0]
-
-        broadcast = mpe.VideoFileClip(video_item)
-        audio_background = mpe.AudioFileClip(audio_item)
-        broadcast = broadcast.set_audio(audio_background)
-        broadcast.write_videofile(broadcast.filename, logger=None)
-        broadcast.close()
-        audio_background.close()
-
-        # Remove audio
-        os.remove(audio_background.filename)
 
     def templatefilename(self, item):
 
@@ -1533,7 +1444,7 @@ def main():
     parser.add_argument('--proxies', default={}, help='Enable use of proxies, add a valid JSON with http or/and https urls.')
     parser.add_argument('--include-location', '--include_location', action='store_true', default=False,
                         help='Include location data when saving media metadata')
-    parser.add_argument('--media-types', '--media_types', '-t', nargs='+', default=['image', 'video', 'story', 'broadcast'],
+    parser.add_argument('--media-types', '--media_types', '-t', nargs='+', default=['image', 'video', 'story'],
                         help='Specify media types to scrape')
     parser.add_argument('--latest', action='store_true', default=False, help='Scrape new media since the last scrape')
     parser.add_argument('--latest-stamps', '--latest_stamps', default=None,
