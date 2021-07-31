@@ -609,7 +609,12 @@ class InstagramScraper(object):
             try:
                 return json.loads(resp)['graphql']['shortcode_media']
             except ValueError:
-                self.logger.warning('Failed to get media details for ' + shortcode)
+                # Response wasn't JSON, so maybe it was an HTML page.
+                data = resp.split("window.__additionalDataLoaded(")[1].split("});</script>")[0].split('{"graphql":')[1]
+                try:
+                    return json.loads(data)['shortcode_media']
+                except ValueError:
+                    self.logger.warning('Failed to get media details for ' + shortcode)
 
         else:
             self.logger.warning('Failed to get media details for ' + shortcode)
