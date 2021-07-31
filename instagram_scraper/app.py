@@ -1094,6 +1094,10 @@ class InstagramScraper(object):
                                             downloaded = 0
                                             media_file.seek(0)
                                         content_length = response.headers.get('Content-Length')
+
+                                        if content_length is None:
+                                            content_length = response.headers.get('x-full-image-content-length')
+
                                         if content_length is None:
                                             self.logger.warning('No Content-Length in response, the file {0} may be partially downloaded'.format(base_name))
                                         else:
