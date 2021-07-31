@@ -748,7 +748,11 @@ class InstagramScraper(object):
                 'is_joined_recently': user_info['is_joined_recently'],
                 'is_private': user_info['is_private'],
                 'posts_count': user_info['edge_owner_to_timeline_media']['count'],
-                'profile_pic_url': user_info['profile_pic_url']
+                'profile_pic_url': user_info['profile_pic_url'],
+                'external_url': user_info['external_url'],
+                'business_email': user_info['business_email'],
+                'business_phone_number': user_info['business_phone_number'],
+                'business_category_name': user_info['business_category_name']
             }
         except (KeyError, IndexError, StopIteration):
             self.logger.warning('Failed to build {0} profile info'.format(username))
