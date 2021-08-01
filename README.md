@@ -212,6 +212,12 @@ If you want to save `cookiejar` to you HDD you have to run it like this:
 $ docker run -it --rm -v $(pwd)/data:/instagram-scraper/data instagram-scraper -i -d data/<folder_name> --cookiejar data/my_cookies <params>
 ```
 
+#### Run built image
+You could run already built image from here https://hub.docker.com/repository/docker/alexnik/instagram-scraper
+```bash
+$ docker run -it --rm -v $(pwd)/data:/instagram-scraper/data alexnik/instagram-scraper -i -d data/<folder_name> --cookiejar data/my_cookies <params>
+```
+
 Develop
 -------
 
