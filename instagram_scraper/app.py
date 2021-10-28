@@ -133,7 +133,7 @@ class InstagramScraper(object):
 
         try:
             if self.proxies and type(self.proxies) == str:
-                self.session.proxies = json.loads(self.proxies)
+                self.session.proxies = self._get_json(self.proxies)
         except ValueError:
             self.logger.error("Check is valid json type.")
             raise
@@ -153,6 +153,13 @@ class InstagramScraper(object):
         if default_attr['filter']:
             self.filter = list(self.filter)
         self.quit = False
+
+    def _get_json(self, text):
+        try:
+            return json.loads(text)
+        except json.JSONDecodeError as error:
+            self.logger.error('Text is not json: ' + text)
+            raise
 
     def sleep(self, secs):
         min_delay = 1
@@ -252,7 +259,7 @@ class InstagramScraper(object):
         login = self.session.post(LOGIN_URL, data=login_data, allow_redirects=True)
         self.session.headers.update({'X-CSRFToken': login.cookies['csrftoken']})
         self.cookies = login.cookies
-        login_text = json.loads(login.text)
+        login_text = self._get_json(login.text)
 
         if login_text.get('authenticated') and login.status_code == 200:
             self.authenticated = True
@@ -292,7 +299,7 @@ class InstagramScraper(object):
         code = self.session.post(BASE_URL[:-1] + checkpoint_url, data=code_data, allow_redirects=True)
         self.session.headers.update({'X-CSRFToken': code.cookies['csrftoken']})
         self.cookies = code.cookies
-        code_text = json.loads(code.text)
+        code_text = self._get_json(code.text)
 
         if code_text.get('status') == 'ok':
             self.authenticated = True
@@ -395,7 +402,7 @@ class InstagramScraper(object):
         resp = self.get_json(QUERY_FOLLOWINGS.format(params))
 
         if resp is not None:
-            payload = json.loads(resp)['data']['user']['edge_follow']
+            payload = self._get_json(resp)['data']['user']['edge_follow']
             if payload:
                 end_cursor = payload['page_info']['end_cursor']
                 followings = []
@@ -428,7 +435,7 @@ class InstagramScraper(object):
         resp = self.get_json(QUERY_COMMENTS.format(params))
 
         if resp is not None:
-            payload = json.loads(resp)['data']['shortcode_media']
+            payload = self._get_json(resp)['data']['shortcode_media']
 
             if payload:
                 container = payload['edge_media_to_comment']
@@ -551,7 +558,7 @@ class InstagramScraper(object):
         resp = self.get_json(url.format(params))
 
         if resp is not None:
-            payload = json.loads(resp)['data'][entity_name]
+            payload = self._get_json(resp)['data'][entity_name]
 
             if payload:
                 nodes = []
@@ -607,12 +614,12 @@ class InstagramScraper(object):
 
         if resp is not None:
             try:
-                return json.loads(resp)['graphql']['shortcode_media']
+                return self._get_json(resp)['graphql']['shortcode_media']
             except ValueError:
                 # Response wasn't JSON, so maybe it was an HTML page.
                 data = resp.split("window.__additionalDataLoaded(")[1].split("});</script>")[0].split('{"graphql":')[1]
                 try:
-                    return json.loads(data)['shortcode_media']
+                    return self._get_json(data)['shortcode_media']
                 except ValueError:
                     self.logger.warning('Failed to get media details for ' + shortcode)
 
@@ -702,7 +709,7 @@ class InstagramScraper(object):
                 self.logger.error('Error getting user info for {0}'.format(username))
                 return
 
-            user_info = json.loads(resp)['user']
+            user_info = self._get_json(resp)['user']
 
             if 'has_anonymous_profile_picture' in user_info and user_info['has_anonymous_profile_picture']:
                 return
@@ -741,7 +748,7 @@ class InstagramScraper(object):
 
         self.logger.info( 'Saving metadata general information on {0}.json'.format(username) )
 
-        user_info = json.loads(resp)['graphql']['user']
+        user_info = self._get_json(resp)['graphql']['user']
 
         try:
             profile_info = {
@@ -854,14 +861,14 @@ class InstagramScraper(object):
                 if "window._sharedData = " in resp:
                     shared_data = resp.split("window._sharedData = ")[1].split(";</script>")[0]
                     if shared_data:
-                        userinfo = self.deep_get(json.loads(shared_data), 'entry_data.ProfilePage[0].graphql.user')
+                        userinfo = self.deep_get(self._get_json(shared_data), 'entry_data.ProfilePage[0].graphql.user')
                 
                 if "window.__additionalDataLoaded(" in resp and not userinfo:
                     parameters = resp.split("window.__additionalDataLoaded(")[1].split(");</script>")[0]
                     if parameters and "," in parameters:
                         shared_data = parameters.split(",", 1)[1]
                         if shared_data:
-                            userinfo = self.deep_get(json.loads(shared_data), 'graphql.user')
+                            userinfo = self.deep_get(self._get_json(shared_data), 'graphql.user')
             except (TypeError, KeyError, IndexError):
                 pass
         
@@ -871,7 +878,7 @@ class InstagramScraper(object):
         resp = self.get_json(url)
 
         if resp is not None:
-            retval = json.loads(resp)
+            retval = self._get_json(resp)
             if retval['data'] and 'reels_media' in retval['data'] and len(retval['data']['reels_media']) > 0 and len(retval['data']['reels_media'][0]['items']) > 0:
                 items = []
 
@@ -895,7 +902,7 @@ class InstagramScraper(object):
         resp = self.get_json(HIGHLIGHT_STORIES_USER_ID_URL.format(user_id))
 
         if resp is not None:
-            retval = json.loads(resp)
+            retval = self._get_json(resp)
 
             if retval['data'] and 'user' in retval['data'] and 'edge_highlight_reels' in retval['data']['user'] and \
                     'edges' in retval['data']['user']['edge_highlight_reels']:
@@ -942,7 +949,7 @@ class InstagramScraper(object):
         resp = self.get_json(QUERY_MEDIA.format(params))
 
         if resp is not None:
-            payload = json.loads(resp)['data']['user']
+            payload = self._get_json(resp)['data']['user']
 
             if payload:
                 container = payload['edge_owner_to_timeline_media']
