@@ -193,7 +193,7 @@ OPTIONS
                         If the template is invalid, it will revert to the default.
                         Does not work with --tag and --location.
 ```
-Develop
+Docker
 -------
 How to install Docker see https://docs.docker.com/engine/install/.
 
