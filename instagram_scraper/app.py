@@ -783,7 +783,7 @@ class InstagramScraper(object):
     def get_stories(self, dst, executor, future_to_item, user, username):
         """Scrapes the user's stories."""
         if self.logged_in and \
-                ('story-image' in self.media_types or 'story-video' in self.media_types):
+                ('story-image' in self.media_types or 'story-video' in self.media_types or 'none' in self.media_types):
             # Get the user's stories.
             all_stories = []
             all_stories.extend(self.fetch_main_stories(user['id']))
