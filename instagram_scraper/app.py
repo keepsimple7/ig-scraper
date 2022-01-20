@@ -588,6 +588,7 @@ class InstagramScraper(object):
 
         if 'urls' not in node:
             node['urls'] = []
+
         if node['is_video'] and 'video_url' in node:
             node['urls'] = [node['video_url']]
         elif '__typename' in node and node['__typename'] == 'GraphImage':
@@ -604,17 +605,25 @@ class InstagramScraper(object):
                     for carousel_item in details['edge_sidecar_to_children']['edges']:
                         urls += self.augment_node(carousel_item['node'])['urls']
                     node['urls'] = urls
+                elif 'display_url' in details:
+                    node['urls'] = [self.get_original_image(details['display_url'])]
                 else:
-                    try:
-                        node['urls'] = [self.get_original_image(details['display_url'])]
-                    except KeyError:
-                        for media in (details['carousel_media'] if 'carousel_media' in details else [details]):
-                            if media['media_type'] == 1:
-                                media_versions = media['image_versions2']['candidates']
-                            elif media['media_type'] == 2:
-                                media_versions = media['video_versions']
+                    for media in (details['carousel_media'] if 'carousel_media' in details else [details]):
+                        if media['media_type'] == 2:
+                            media_versions = media['video_versions']
+                        else:
+                            media_versions = media['image_versions2']['candidates']
 
-                            node['urls'].append(media_versions[0]['url'])
+                            if media['media_type'] != 1:
+                                self.logger.warning('Unknown media type: %d for %s' % (media['media_type'], node['shortcode']))
+                        
+                        best_candidate = media_versions[0]
+                        
+                        for version in media_versions:
+                            if version['height'] > best_candidate['height']:
+                                best_candidate = version
+                            
+                        node['urls'].append(best_candidate['url'])
 
         return node
 
