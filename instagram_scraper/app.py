@@ -605,7 +605,16 @@ class InstagramScraper(object):
                         urls += self.augment_node(carousel_item['node'])['urls']
                     node['urls'] = urls
                 else:
-                    node['urls'] = [self.get_original_image(details['display_url'])]
+                    try:
+                        node['urls'] = [self.get_original_image(details['display_url'])]
+                    except KeyError:
+                        for media in (details['carousel_media'] if 'carousel_media' in details else [details]):
+                            if media['media_type'] == 1:
+                                media_versions = media['image_versions2']['candidates']
+                            elif media['media_type'] == 2:
+                                media_versions = media['video_versions']
+
+                            node['urls'].append(media_versions[0]['url'])
 
         return node
 
@@ -622,7 +631,8 @@ class InstagramScraper(object):
                     return self._get_json(data)['shortcode_media']
                 except ValueError:
                     self.logger.warning('Failed to get media details for ' + shortcode)
-
+            except KeyError:
+                return self._get_json(resp)['items'][0]
         else:
             self.logger.warning('Failed to get media details for ' + shortcode)
 
