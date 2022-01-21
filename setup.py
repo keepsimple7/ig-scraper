@@ -19,6 +19,8 @@ setup(
     download_url='https://github.com/arc298/instagram-scraper/tarball/1.10.3',
     author='Richard Arcega',
     author_email='hello@richardarcega.com',
+    maintainer='Alexander Nikolaev',
+    maintainer_email='alexander@nikolaev.expert',
     license='Public domain',
     packages=find_packages(exclude=['tests']),
     install_requires=requires,
