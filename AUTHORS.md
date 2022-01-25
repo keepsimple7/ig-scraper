@@ -24,3 +24,4 @@ instagram-scraper is written and maintained by Richard Arcega, along with the fo
 - Alexander Nikolaev ([@AlexNik](https://github.com/AlexNik))
 - Kevin Surya ([@kevinsudut](https://github.com/kevinsudut))
 - Ibrahim Mousa ([@ibrahim-mousa](https://github.com/ibrahim-mousa))
+- Artur-Yurii Korchynskyi ([@akorchyn](https://github.com/akorchyn))
