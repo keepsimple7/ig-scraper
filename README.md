@@ -193,6 +193,27 @@ OPTIONS
                         If the template is invalid, it will revert to the default.
                         Does not work with --tag and --location.
 ```
+
+Usage as library
+----------------
+```python
+from pprint import pprint
+import instagram_scraper
+
+args = {"login_user": "LOGIN", "login_pass": "PASSWORD"}
+
+insta_scraper = instagram_scraper.InstagramScraper(**args)
+insta_scraper.authenticate_with_login()
+shared_data = insta_scraper.get_shared_data_userinfo(username='SCRAPED_USERNAME')
+
+arr = []
+
+for item in insta_scraper.query_media_gen(shared_data):
+    arr.append(item)
+
+pprint(arr)
+```
+
 Docker
 -------
 How to install Docker see https://docs.docker.com/engine/install/.
