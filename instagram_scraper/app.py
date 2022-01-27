@@ -616,13 +616,16 @@ class InstagramScraper(object):
 
                             if media['media_type'] != 1:
                                 self.logger.warning('Unknown media type: %d for %s' % (media['media_type'], node['shortcode']))
-                        
+
                         best_candidate = media_versions[0]
-                        
+
                         for version in media_versions:
                             if version['height'] > best_candidate['height']:
                                 best_candidate = version
-                            
+
+                        if best_candidate != media_versions[0]:
+                            self.logger.warning('First media version is not the best candidate for ' + node['shortcode'])
+
                         node['urls'].append(best_candidate['url'])
 
         return node
@@ -672,9 +675,8 @@ class InstagramScraper(object):
                     self.logger.error(
                         'Error getting user details for {0}. Please verify that the user exists.'.format(username))
                     continue
-                elif user and user['is_private'] and user['edge_owner_to_timeline_media']['count'] > 0 and not \
-                    user['edge_owner_to_timeline_media']['edges']:
-                        self.logger.info('User {0} is private'.format(username))
+                elif user and user['is_private']:
+                    self.logger.info('User {0} is private'.format(username))
 
                 self.rhx_gis = ""
 
@@ -1172,10 +1174,15 @@ class InstagramScraper(object):
                         media_file.truncate(downloaded)
 
                 if downloaded == total_length or total_length is None and downloaded > 100:
-                    os.rename(part_file, file_path)
+                    try:
+                        os.rename(part_file, file_path)
+                    except FileNotFoundError:
+                        self.logger.warning('.part file disappeared: ' + part_file)
+
                     timestamp = self.__get_timestamp(item)
-                    file_time = int(timestamp if timestamp else time.time())
-                    os.utime(file_path, (file_time, file_time))
+
+                    if timestamp:
+                        os.utime(file_path, (timestamp, timestamp))
 
             files_path.append(file_path)
 
