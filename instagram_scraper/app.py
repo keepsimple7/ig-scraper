@@ -927,13 +927,13 @@ class InstagramScraper(object):
 
             if retval['data'] and 'user' in retval['data'] and 'edge_highlight_reels' in retval['data']['user'] and \
                     'edges' in retval['data']['user']['edge_highlight_reels']:
-                higlight_stories_ids = [item['node']['id'] for item in
-                                        retval['data']['user']['edge_highlight_reels']['edges']]
+                highlight_stories_ids = [item['node']['id'] for item in
+                                         retval['data']['user']['edge_highlight_reels']['edges']]
 
                 # Workaround for issue https://github.com/arc298/instagram-scraper/issues/488
                 # __fetch_stories with count of ids more than 20 some times returns "Bad gateway" error.
                 # Instagram web site fetches by 3.
-                ids_chunks = [higlight_stories_ids[i:i + 3] for i in range(0, len(higlight_stories_ids), 3)]
+                ids_chunks = [highlight_stories_ids[i:i + 3] for i in range(0, len(highlight_stories_ids), 3)]
 
                 stories = []
 
