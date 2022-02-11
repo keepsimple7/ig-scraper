@@ -235,7 +235,19 @@ class InstagramScraper(object):
         resp = self.safe_get(*args, **kwargs)
 
         if resp is not None:
-            return resp.text
+            text = resp.text
+            try:
+                j = json.loads(text)
+                if isinstance(j, list):
+                    j = j[0]
+                if isinstance(j, str):
+                    j = json.loads(j)
+                if j['status'] == 'fail':
+                    self.logger.error(j['message'])
+                    return None
+            except:
+                pass
+            return text
 
     def authenticate_as_guest(self):
         """Authenticate as a guest/non-signed in user"""
@@ -279,6 +291,8 @@ class InstagramScraper(object):
                 for count, error in enumerate(login_text['errors'].get('error')):
                     count += 1
                     self.logger.debug('Session error %(count)s: "%(error)s"' % locals())
+            elif 'status' in login_text and login_text['status'] == 'fail' and 'message' in login_text:
+                self.logger.error(login_text['message'])
             else:
                 self.logger.error(json.dumps(login_text))
             sys.exit(1)
@@ -642,11 +656,11 @@ class InstagramScraper(object):
                 try:
                     return self._get_json(data)['shortcode_media']
                 except ValueError:
-                    self.logger.warning('Failed to get media details for ' + shortcode)
+                    self.logger.error('Failed to get media details for ' + shortcode)
             except KeyError:
                 return self._get_json(resp)['items'][0]
         else:
-            self.logger.warning('Failed to get media details for ' + shortcode)
+            self.logger.error('Failed to get media details for ' + shortcode)
 
     def __get_location(self, item):
         code = item.get('shortcode', item.get('code'))
