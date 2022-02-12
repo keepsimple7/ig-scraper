@@ -1565,7 +1565,7 @@ def main():
     if args.followings_input:
         scraper.usernames = list(scraper.query_followings_gen(scraper.login_user))
         if args.followings_output:
-            with open(scraper.destination+scraper.followings_output, 'w') as file:
+            with open(os.path.join(scraper.destination, scraper.followings_output), 'w') as file:
                 for username in scraper.usernames:
                     file.write(username + "\n")
             # If not requesting anything else, exit
