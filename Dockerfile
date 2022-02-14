@@ -23,3 +23,7 @@ ENTRYPOINT ["/instagram-scraper/docker_entrypoint.sh"]
 
 COPY --from=building /usr/local/lib/python3.8/site-packages /usr/local/lib/python3.8/site-packages
 COPY --from=building /usr/local/bin/instagram-scraper /usr/local/bin/instagram-scraper
+
+LABEL "Maintainer"="Alexander Nikolaev <zvava@ya.ru>" \
+      "Project page"="https://github.com/arc298/instagram-scraper" \
+      "Donations"="https://ko-fi.com/alexnik"
