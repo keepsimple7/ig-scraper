@@ -234,9 +234,9 @@ $ docker run -it --rm -v $(pwd)/data:/instagram-scraper/data instagram-scraper -
 ```
 
 #### Run built image
-You could run already built image from here https://hub.docker.com/repository/docker/alexnik/instagram-scraper
+You could run already built image from here https://github.com/arc298/instagram-scraper/pkgs/container/instagram-scraper/versions
 ```bash
-$ docker run -it --rm -v $(pwd)/data:/instagram-scraper/data alexnik/instagram-scraper -i -d data/<folder_name> --cookiejar data/my_cookies <params>
+$ docker run -it --rm -v $(pwd)/data:/instagram-scraper/data ghcr.io/arc298/instagram-scraper:latest -i -d data/<folder_name> --cookiejar data/my_cookies <params>
 ```
 
 Develop
