@@ -11,3 +11,5 @@ insta_args.txt
 README.rst
 *.sh
 !docker_entrypoint.sh
+
+instagram_scraper/data
