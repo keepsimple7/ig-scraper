@@ -1010,7 +1010,7 @@ class InstagramScraper(object):
         })
 
     def has_selected_media_types(self, item):
-        filetypes = {'jpg': 0, 'mp4': 0}
+        filetypes = {'jpg': 0, 'mp4': 0, 'webp': 0}
 
         for url in item['urls']:
             ext = self.__get_file_ext(url)
@@ -1018,7 +1018,7 @@ class InstagramScraper(object):
                 filetypes[ext] = 0
             filetypes[ext] += 1
 
-        if ('image' in self.media_types and filetypes['jpg'] > 0) or \
+        if ('image' in self.media_types and (filetypes['jpg'] > 0 or filetypes['webp'] > 0)) or \
                 ('video' in self.media_types and filetypes['mp4'] > 0):
             return True
 
