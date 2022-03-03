@@ -18,10 +18,7 @@ import sys
 import textwrap
 import time
 
-try:
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse
+from urllib.parse import urlparse
 
 import warnings
 import threading
@@ -32,15 +29,10 @@ import tqdm
 
 from instagram_scraper.constants import *
 
-try:
-    reload(sys)  # Python 2.7
-    sys.setdefaultencoding("UTF8")
-except NameError:
-    pass
-
 warnings.filterwarnings('ignore')
 
 input_lock = threading.RLock()
+
 
 class LockedStream(object):
     file = None
