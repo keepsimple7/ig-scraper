@@ -46,6 +46,9 @@ class LockedStream(object):
     def flush(self):
         return getattr(self.file, 'flush', lambda: None)()
 
+    def fileno(self):
+        return self.file.fileno()
+
 def allowed_gai_family():
     family = socket.AF_INET  # force IPv4
     return family
@@ -506,7 +509,7 @@ class InstagramScraper(object):
                             pass
                         else:
                             self.posts.append(item)
-                            
+
                     iter = iter + 1
                     if self.maximum != 0 and iter >= self.maximum:
                         break
@@ -882,14 +885,14 @@ class InstagramScraper(object):
         resp = self.get_json(BASE_URL + username)
 
         userinfo = None
-        
+
         if resp is not None:
             try:
                 if "window._sharedData = " in resp:
                     shared_data = resp.split("window._sharedData = ")[1].split(";</script>")[0]
                     if shared_data:
                         userinfo = self.deep_get(self._get_json(shared_data), 'entry_data.ProfilePage[0].graphql.user')
-                
+
                 if "window.__additionalDataLoaded(" in resp and not userinfo:
                     parameters = resp.split("window.__additionalDataLoaded(")[1].split(");</script>")[0]
                     if parameters and "," in parameters:
@@ -898,7 +901,7 @@ class InstagramScraper(object):
                             userinfo = self.deep_get(self._get_json(shared_data), 'graphql.user')
             except (TypeError, KeyError, IndexError):
                 pass
-        
+
         return userinfo
 
     def __fetch_stories(self, url, fetching_highlights_metadata=False):
@@ -1296,7 +1299,7 @@ class InstagramScraper(object):
                 file_data_ids.pop(file_data_ids.index(id_))
             else:
                 unique_ids.add(id_)
-            
+
     @staticmethod
     def save_json(data, dst='./'):
         """Saves the data to a json file."""
