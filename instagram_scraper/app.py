@@ -1567,7 +1567,12 @@ def main():
     scraper = InstagramScraper(**vars(args))
 
     if args.login_user and args.login_pass:
-        scraper.authenticate_with_login()
+        try:
+            scraper.authenticate_with_login()
+        except KeyError as e:
+            if 'csrftoken' in str(e):
+                raise KeyError('This error usually indicates that your IP address has been rate limited by Instagram. Try with a different VPN or proxy.') from e
+            raise
     else:
         scraper.authenticate_as_guest()
 
