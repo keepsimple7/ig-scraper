@@ -5,6 +5,14 @@ CHROME_WIN_UA = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML,
 USER_URL = BASE_URL + '{0}/?__a=1'
 USER_INFO = 'https://i.instagram.com/api/v1/users/{0}/info/'
 
+WEB_PROFILE_INFO = 'https://i.instagram.com/api/v1/users/web_profile_info/?username={0}'
+
+# Constants from Instagram web app
+API_HEADERS = {
+    'X-ASBD-ID': '198387', 
+    'X-IG-App-ID': '936619743392459'
+}
+
 MAIN_STORIES_URL = BASE_URL + 'graphql/query/?query_hash=45246d3fe16ccc6577e0bd297a5db1ab&variables=%7B%22reel_ids%22%3A%5B%22{0}%22%5D%2C%22tag_names%22%3A%5B%5D%2C%22location_ids%22%3A%5B%5D%2C%22highlight_reel_ids%22%3A%5B%5D%2C%22precomposed_overlay%22%3Afalse%7D'
 HIGHLIGHT_STORIES_USER_ID_URL = BASE_URL + 'graphql/query/?query_hash=c9100bf9110dd6361671f113dd02e7d6&variables=%7B%22user_id%22%3A%22{0}%22%2C%22include_chaining%22%3Afalse%2C%22include_reel%22%3Afalse%2C%22include_suggested_users%22%3Afalse%2C%22include_logged_out_extras%22%3Afalse%2C%22include_highlight_reels%22%3Atrue%2C%22include_related_profiles%22%3Afalse%7D'
 HIGHLIGHT_STORIES_REEL_ID_URL = BASE_URL + 'graphql/query/?query_hash=45246d3fe16ccc6577e0bd297a5db1ab&variables=%7B%22reel_ids%22%3A%5B%5D%2C%22tag_names%22%3A%5B%5D%2C%22location_ids%22%3A%5B%5D%2C%22highlight_reel_ids%22%3A%5B%22{0}%22%5D%2C%22precomposed_overlay%22%3Afalse%7D'
@@ -14,7 +22,7 @@ BROADCAST_URL = BASE_URL + 'api/v1/feed/user/{0}/story/'
 
 TAGS_URL = BASE_URL + 'explore/tags/{0}/?__a=1'
 LOCATIONS_URL = BASE_URL + 'explore/locations/{0}/?__a=1'
-VIEW_MEDIA_URL = BASE_URL + 'p/{0}/?__a=1'
+VIEW_MEDIA_URL = 'https://i.instagram.com/api/v1/media/{0}/info/'
 SEARCH_URL = BASE_URL + 'web/search/topsearch/?context=blended&query={0}'
 
 QUERY_FOLLOWINGS = BASE_URL + 'graphql/query/?query_hash=c56ee0ae1f89cdbd1c89e2bc6b8f3d18&variables={0}'
