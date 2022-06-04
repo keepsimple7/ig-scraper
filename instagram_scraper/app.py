@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import argparse
+import base64
 import codecs
 import configparser
 import errno
@@ -639,22 +640,13 @@ class InstagramScraper(object):
 
         return node
 
-    def __get_media_details(self, shortcode):
-        resp = self.get_json(VIEW_MEDIA_URL.format(shortcode))
+    def shortcode_to_mediaid(self, shortcode):
+        return int.from_bytes(base64.urlsafe_b64decode('A' * (12 - len(shortcode)) + shortcode), 'big')
 
-        if resp is not None:
-            try:
-                return self._get_json(resp)['graphql']['shortcode_media']
-            except ValueError:
-                # Response wasn't JSON, so maybe it was an HTML page.
-                data = resp.split("window.__additionalDataLoaded(")[1].split("});</script>")[0].split('{"graphql":')[1]
-                try:
-                    return self._get_json(data)['shortcode_media']
-                except ValueError:
-                    self.logger.error('Failed to get media details for ' + shortcode)
-            except KeyError:
-                return self._get_json(resp)['items'][0]
-        else:
+    def __get_media_details(self, shortcode):
+        try:
+            return self._get_json(self.get_json(VIEW_MEDIA_URL.format(self.shortcode_to_mediaid(shortcode)), headers=API_HEADERS))['items'][0]
+        except:
             self.logger.error('Failed to get media details for ' + shortcode)
 
     def __get_location(self, item):
@@ -697,7 +689,6 @@ class InstagramScraper(object):
 
                 # Crawls the media and sends it to the executor.
                 try:
-
                     self.get_media(dst, executor, future_to_item, user)
 
                     # Displays the progress bar of completed downloads. Might not even pop up if all media is downloaded while
@@ -882,27 +873,12 @@ class InstagramScraper(object):
 
     def get_shared_data_userinfo(self, username=''):
         """Fetches the user's metadata."""
-        resp = self.get_json(BASE_URL + username)
+        try:
+            resp = self.get_json(WEB_PROFILE_INFO.format(username), headers=API_HEADERS)
 
-        userinfo = None
-
-        if resp is not None:
-            try:
-                if "window._sharedData = " in resp:
-                    shared_data = resp.split("window._sharedData = ")[1].split(";</script>")[0]
-                    if shared_data:
-                        userinfo = self.deep_get(self._get_json(shared_data), 'entry_data.ProfilePage[0].graphql.user')
-
-                if "window.__additionalDataLoaded(" in resp and not userinfo:
-                    parameters = resp.split("window.__additionalDataLoaded(")[1].split(");</script>")[0]
-                    if parameters and "," in parameters:
-                        shared_data = parameters.split(",", 1)[1]
-                        if shared_data:
-                            userinfo = self.deep_get(self._get_json(shared_data), 'graphql.user')
-            except (TypeError, KeyError, IndexError):
-                pass
-
-        return userinfo
+            return self._get_json(resp)['data']['user']
+        except:
+            return None
 
     def __fetch_stories(self, url, fetching_highlights_metadata=False):
         resp = self.get_json(url)
