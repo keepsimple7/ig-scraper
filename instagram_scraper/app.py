@@ -28,7 +28,7 @@ import requests
 import requests.packages.urllib3.util.connection as urllib3_connection
 import tqdm
 
-from instagram_scraper.constants import *
+from .constants import *
 
 warnings.filterwarnings('ignore')
 
@@ -394,8 +394,8 @@ class InstagramScraper(object):
     def query_followings_gen(self, username, end_cursor=''):
         """Generator for followings."""
         user = self.get_shared_data_userinfo(username)
-        id = user['id']
-        followings, end_cursor = self.__query_followings(id, end_cursor)
+        uid = user['id']
+        followings, end_cursor = self.__query_followings(uid, end_cursor)
 
 
         if followings:
@@ -403,7 +403,7 @@ class InstagramScraper(object):
                 for following in followings:
                     yield following
                 if end_cursor:
-                    followings, end_cursor = self.__query_followings(id, end_cursor)
+                    followings, end_cursor = self.__query_followings(uid, end_cursor)
                 else:
                     return
 
@@ -646,7 +646,7 @@ class InstagramScraper(object):
     def __get_media_details(self, shortcode):
         try:
             return self._get_json(self.get_json(VIEW_MEDIA_URL.format(self.shortcode_to_mediaid(shortcode)), headers=API_HEADERS))['items'][0]
-        except:
+        except (TypeError, KeyError, IndexError):
             self.logger.error('Failed to get media details for ' + shortcode)
 
     def __get_location(self, item):
@@ -760,7 +760,8 @@ class InstagramScraper(object):
     def get_profile_info(self, dst, username):
         if self.profile_metadata is False:
             return
-        url = USER_URL.format(username)
+
+        url = WEB_PROFILE_INFO.format(username)
         resp = self.get_json(url)
 
         if resp is None:
@@ -769,7 +770,7 @@ class InstagramScraper(object):
 
         self.logger.info( 'Saving metadata general information on {0}.json'.format(username) )
 
-        user_info = self._get_json(resp)['graphql']['user']
+        user_info = self._get_json(resp)['data']['user']
 
         try:
             profile_info = {
@@ -877,7 +878,7 @@ class InstagramScraper(object):
             resp = self.get_json(WEB_PROFILE_INFO.format(username), headers=API_HEADERS)
 
             return self._get_json(resp)['data']['user']
-        except:
+        except (TypeError, KeyError, IndexError):
             return None
 
     def __fetch_stories(self, url, fetching_highlights_metadata=False):
