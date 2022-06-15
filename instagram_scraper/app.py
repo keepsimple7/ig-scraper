@@ -90,7 +90,7 @@ class InstagramScraper(object):
                             media_types=['image', 'video', 'story-image', 'story-video'],
                             tag=False, location=False, search_location=False, comments=False,
                             verbose=0, include_location=False, filter=None, proxies={}, no_check_certificate=False,
-                                                        template='{urlname}', log_destination='')
+                                                        template='{urlname}', log_destination='', color=False)
 
         allowed_attr = list(default_attr.keys())
         default_attr.update(kwargs)
@@ -118,7 +118,10 @@ class InstagramScraper(object):
 
         # Set up a logger
         if self.logger is None:
-            self.logger = InstagramScraper.get_logger(level=logging.DEBUG, dest=default_attr.get('log_destination'), verbose=default_attr.get('verbose'))
+            self.logger = InstagramScraper.get_logger(logging.DEBUG,
+                                                      default_attr.get('log_destination'),
+                                                      default_attr.get('verbose'),
+                                                      default_attr.get('color'))
 
         self.posts = []
         self.stories = []
@@ -397,7 +400,6 @@ class InstagramScraper(object):
         uid = user['id']
         followings, end_cursor = self.__query_followings(uid, end_cursor)
 
-
         if followings:
             while True:
                 for following in followings:
@@ -593,7 +595,7 @@ class InstagramScraper(object):
 
         details = None
         if self.include_location and 'location' not in node:
-            details = self.__get_media_details(node['shortcode'])
+            details = self.__get_media_details(node['id'])
             node['location'] = details.get('location') if details else None
 
         if 'urls' not in node:
@@ -605,7 +607,7 @@ class InstagramScraper(object):
             node['urls'] = [self.get_original_image(node['display_url'])]
         else:
             if details is None:
-                details = self.__get_media_details(node['shortcode'])
+                details = self.__get_media_details(node['id'])
 
             if details:
                 if '__typename' in details and details['__typename'] == 'GraphVideo':
@@ -640,25 +642,23 @@ class InstagramScraper(object):
 
         return node
 
-    def shortcode_to_mediaid(self, shortcode):
-        return int.from_bytes(base64.urlsafe_b64decode('A' * (12 - len(shortcode)) + shortcode), 'big')
-
-    def __get_media_details(self, shortcode):
+    def __get_media_details(self, media_id):
         try:
-            return self._get_json(self.get_json(VIEW_MEDIA_URL.format(self.shortcode_to_mediaid(shortcode)), headers=API_HEADERS))['items'][0]
+            return self._get_json(self.get_json(VIEW_MEDIA_URL.format(media_id)))['items'][0]
         except (TypeError, KeyError, IndexError):
-            self.logger.error('Failed to get media details for ' + shortcode)
+            self.logger.error('Failed to get media details for ' + media_id)
 
     def __get_location(self, item):
-        code = item.get('shortcode', item.get('code'))
+        media_id = item.get('id')
 
-        if code:
-            details = self.__get_media_details(code)
+        if media_id:
+            details = self.__get_media_details(media_id)
             item['location'] = details.get('location') if details else None
 
     def scrape(self, executor=concurrent.futures.ThreadPoolExecutor(max_workers=MAX_CONCURRENT_DOWNLOADS)):
         """Crawls through and downloads user's media"""
         self.session.headers.update({'user-agent': STORIES_UA})
+
         try:
             for username in self.usernames:
                 self.posts = []
@@ -677,7 +677,7 @@ class InstagramScraper(object):
                         'Error getting user details for {0}. Please verify that the user exists.'.format(username))
                     continue
                 elif user and user['is_private']:
-                    self.logger.info('User {0} is private'.format(username))
+                    self.logger.warning('User {0} is private'.format(username))
 
                 self.rhx_gis = ""
 
@@ -875,7 +875,7 @@ class InstagramScraper(object):
     def get_shared_data_userinfo(self, username=''):
         """Fetches the user's metadata."""
         try:
-            resp = self.get_json(WEB_PROFILE_INFO.format(username), headers=API_HEADERS)
+            resp = self.get_json(WEB_PROFILE_INFO.format(username))
 
             return self._get_json(resp)['data']['user']
         except (TypeError, KeyError, IndexError):
@@ -1309,7 +1309,7 @@ class InstagramScraper(object):
                     self.save_json({'GraphStories': self.stories}, metadata_path)
 
     @staticmethod
-    def get_logger(level=logging.DEBUG, dest='', verbose=0):
+    def get_logger(level=logging.DEBUG, dest='', verbose=0, color=False):
         """Returns a logger."""
         logger = logging.getLogger(__name__)
 
@@ -1320,6 +1320,11 @@ class InstagramScraper(object):
         logger.addHandler(fh)
 
         sh = logging.StreamHandler(sys.stdout)
+
+        if color:
+            logging.addLevelName(logging.WARNING, '\033[1;93m' + logging.getLevelName(logging.WARNING) + '\033[1;0m')
+            logging.addLevelName(logging.ERROR, '\033[1;91m' + logging.getLevelName(logging.ERROR) + '\033[1;0m')
+
         sh.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
         sh_lvls = [logging.ERROR, logging.WARNING, logging.INFO]
         sh.setLevel(sh_lvls[verbose])
@@ -1495,6 +1500,7 @@ def main():
     parser.add_argument('--verbose', '-v', type=int, default=0, help='Logging verbosity level')
     parser.add_argument('--template', '-T', type=str, default='{urlname}', help='Customize filename template')
     parser.add_argument('--log_destination', '-l', type=str, default='', help='destination folder for the instagram-scraper.log file')
+    parser.add_argument('--color', action='store_true', default=False, help='color debug output')
 
     args = parser.parse_args()
 
