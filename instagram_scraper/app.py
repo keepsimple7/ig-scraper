@@ -429,7 +429,7 @@ class InstagramScraper(object):
 
         if comments:
             try:
-                while True:
+                while comments is not None:
                     for item in comments:
                         yield item
 
