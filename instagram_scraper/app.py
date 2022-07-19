@@ -427,18 +427,17 @@ class InstagramScraper(object):
         """Generator for comments."""
         comments, end_cursor = self.__query_comments(shortcode, end_cursor)
 
-        if comments:
-            try:
-                while comments is not None:
-                    for item in comments:
-                        yield item
+        try:
+            while comments is not None:
+                for item in comments:
+                    yield item
 
-                    if end_cursor:
-                        comments, end_cursor = self.__query_comments(shortcode, end_cursor)
-                    else:
-                        return
-            except ValueError:
-                self.logger.exception('Failed to query comments for shortcode ' + shortcode)
+                if end_cursor:
+                    comments, end_cursor = self.__query_comments(shortcode, end_cursor)
+                else:
+                    return
+        except ValueError:
+            self.logger.exception('Failed to query comments for shortcode ' + shortcode)
 
     def __query_comments(self, shortcode, end_cursor=''):
         params = QUERY_COMMENTS_VARS.format(shortcode, end_cursor)
