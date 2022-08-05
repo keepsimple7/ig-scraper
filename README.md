@@ -2,7 +2,7 @@
 
 Instagram Scraper
 =================
-[![PyPI](https://img.shields.io/pypi/v/instagram-scraper.svg)](https://pypi.python.org/pypi/instagram-scraper) [![Build Status](https://travis-ci.com/arc298/instagram-scraper.svg?branch=master)](https://travis-ci.com/arc298/instagram-scraper) ![PyPI - Implementation](https://img.shields.io/pypi/implementation/instagram-scraper) ![PyPI - Wheel](https://img.shields.io/pypi/wheel/instagram-scraper) <a href="https://ko-fi.com/alexnik"><img src="https://uploads-ssl.webflow.com/5c14e387dab576fe667689cf/61e11d6ea0473a3528b575b4_Button-3-p-500.png" alt="Buy me a beer" height="21" /></a>
+[![PyPI](https://img.shields.io/pypi/v/instagram-scraper.svg)](https://pypi.python.org/pypi/instagram-scraper) [![Build Status](https://travis-ci.com/arc298/instagram-scraper.svg?branch=master)](https://travis-ci.com/arc298/instagram-scraper) ![PyPI - Implementation](https://img.shields.io/pypi/implementation/instagram-scraper) ![PyPI - Wheel](https://img.shields.io/pypi/wheel/instagram-scraper) [![#Donations](https://img.shields.io/badge/%E2%9D%A4-Donate-red)](#donations)
 
 instagram-scraper is a command-line application written in Python that scrapes and downloads an instagram user's photos and videos. Use responsibly.
 
@@ -293,7 +293,10 @@ OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Donations
----------
-<a href="https://ko-fi.com/alexnik"><img src="https://media0.giphy.com/media/IyxgVhamKXhfcAEF4h/giphy.gif?cid=790b7611d2e50ed08083edb0daad8317a6814959b047a5db&rid=giphy.gif&ct=g" alt="Buy me a beer"/></a>
+## Donations
+Crypto  
 
+|       Coin        | Network |                   Address                    |                     QR                      |
+|:-----------------:|:-------:|:--------------------------------------------:|:-------------------------------------------:|
+| BNB Beacon Chain  |  BEP2   |  bnb1yddaswq67g3ul35j97sx4ye4g6r0aukfcz406d  | ![BNB](/donations_qr/BNB_Beacon_Chain.png)  |
+|  BNB Smart Chain  |  BEP20  | 0x68a7F5E356602349a181BbE89b247D00dbD8F2af   |  ![BNB](/donations_qr/BNB_Smart_Chain.png)  |
