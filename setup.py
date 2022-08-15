@@ -11,21 +11,15 @@ if sys.version_info < (3, 2):
     requires.append('configparser')
 
 setup(
-    name='instagram-scraper',
+    name='ig-scraper',
     version='1.11.0',
-    description=("instagram-scraper is a command-line application written in Python"
+    description=("ig-scraper is a command-line application written in Python"
                  " that scrapes and downloads an instagram user\'s photos and videos. Use responsibly."),
-    url='https://github.com/arc298/instagram-scraper',
-    download_url='https://github.com/arc298/instagram-scraper/tarball/1.11.0',
-    author='Richard Arcega',
-    author_email='hello@richardarcega.com',
-    maintainer='Alexander Nikolaev',
-    maintainer_email='alexander@nikolaev.expert',
     license='Public domain',
     packages=find_packages(exclude=['tests']),
     install_requires=requires,
     entry_points={
-        'console_scripts': ['instagram-scraper=instagram_scraper.app:main'],
+        'console_scripts': ['ig-scraper=instagram_scraper.app:main'],
     },
     test_suite='nose.collector',
     zip_safe=False,
